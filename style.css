@@ -1,0 +1,58 @@
+div#main_container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 1010px;
+  height: 810px;
+  background-color: #FF0000;
+}
+div#users {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 200px;
+  height: 500px;
+  background-color: #CCCCCC;
+  overflow: auto;
+}			
+div#chat_screen {
+  position: absolute;
+  top: 10px;
+  left: 210px;
+  width: 790px;
+  height: 460px;
+  background-color: #DDDDDD;
+  overflow: auto;
+}
+div#message_entry {
+  position: absolute;
+  top: 470px;
+  left: 210px;
+  width: 790px;
+  height: 30px;
+  background-color: #EEEEEE;
+}
+div#private_messages {
+  position: absolute;
+  left: 10px;
+  top: 500px;
+  width: 990px;
+  height: 300px;
+  background-color: #BBBBBB;
+  color: #555500;
+  overflow: auto;
+}
+input {
+  font-family: Verdana;
+  font-size: 12pt;
+  font-weight: 500;
+}
+input#message {
+  width: 500px;
+}
+tr.selectable {
+  cursor: pointer;
+}
+tr.selectable:hover td {
+  background-color: #FFFFAA;
+}
