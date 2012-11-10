@@ -5,24 +5,23 @@ var io = require('socket.io').listen(chatMultiApp);
 chatMultiApp.listen(8056);
 
 var connectedClients = [];
-var nConnected = 0;
 var userList = [];
 
 function newMsg(socket, data)
-{	
-	for(var j = 0; j < nConnected; j++)
+{  
+	if(connectedClients.hasOwnProperty(socket.id))
 	{
-		if(socket.id == connectedClients[j].id &&
-		   data.from == connectedClients[j].userName)
-		   {		   
+    var clientFrom = connectedClients[socket.id];
+		if(data.from == clientFrom.userName)
+    {		   
 				if(data.type == 'PRIVATE')
 				{					
-					for(var i = 0; i < nConnected; i++)
-					{
-						if(connectedClients[i].userName == data.to)
+					for(client in connectedClients)
+					{            
+						if(connectedClients[client].userName == data.to)
 						{
-							connectedClients[i].socket.emit('msg', data);
-              break;
+              console.log("data: " + data);
+							connectedClients[client].socket.emit('msg', data);              
 						}				
 					}
 				}
@@ -30,8 +29,7 @@ function newMsg(socket, data)
 				{
 					socket.emit('msg', data);
 					socket.broadcast.emit('msg', data);					
-				}
-				break;
+				}				
 		  }
 	 }
 }
@@ -52,7 +50,7 @@ function handleMultiChat(request, response)
 		{
 			response.writeHead(200);
 			var debugData = {};
-			debugData.users = nConnected;
+			debugData.users = connectedClients;
 			debugData.userNames = userList;			
 			response.end(JSON.stringify(debugData));
 		}		
@@ -66,20 +64,14 @@ function handleMultiChat(request, response)
 
 function assignUserName(userName, idSocket)
 {
-	for(var i = 0; i < nConnected; i++)
-	{
-		if(idSocket == connectedClients[i].id)
-		{
-			connectedClients[i].userName = userName;			
-		}		
-	}	
+	connectedClients[idSocket].userName = userName;
 }
 
 function isUserNameAvailable(userName)
 {
-	for(var i = 0; i < userList.length; i++)
+	for(var client in connectedClients)
 	{
-		if(userList[i].userName == userName)
+		if(connectedClients[client].userName == userName)
 		{
 			return false;			
 		}
@@ -90,18 +82,18 @@ function isUserNameAvailable(userName)
 function makeUserList()
 {
 	userList = [];	
-	for(var i = 0; i < nConnected; i++)
-	{
-		userList[i] = {"userName" : connectedClients[i].userName};
+  var i = 0;
+	for(var client in connectedClients)
+	{    
+		userList[i] = {"userName" : connectedClients[client].userName};
+    i++;
 	}	
 }
 
 io.sockets.on('connection', function(socket) {
 	
-	connectedClients[nConnected] = {};
-	connectedClients[nConnected].id = socket.id;
-	connectedClients[nConnected].socket = socket;	
-	nConnected++;
+	connectedClients[socket.id] = {};	
+	connectedClients[socket.id].socket = socket;	
 	
 	socket.on('authData', function(data) {
 		if(isUserNameAvailable(data.userName) == true)
@@ -122,15 +114,10 @@ io.sockets.on('connection', function(socket) {
 	});
 	
 	socket.on('disconnect', function(data) {		
-		for(var i = 0; i < nConnected; i++)
-		{
-			if(connectedClients[i].id == socket.id)
-			{				
-				connectedClients.splice(i, 1);
-				nConnected--;				
-				break;
-			}
-		}
+    if(connectedClients.hasOwnProperty(socket.id))
+    {
+      connectedClients[socket.id] = null;        
+    }    
 		makeUserList();
 		socket.broadcast.emit('userList', userList);
 	});	
