@@ -116,7 +116,7 @@ io.sockets.on('connection', function(socket) {
 	socket.on('disconnect', function(data) {		
     if(connectedClients.hasOwnProperty(socket.id))
     {
-      connectedClients[socket.id] = null;        
+      delete connectedClients[socket.id];
     }    
 		makeUserList();
 		socket.broadcast.emit('userList', userList);

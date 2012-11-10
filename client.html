@@ -7,95 +7,72 @@
 			var socket = null;		
 			var userName = null;
 			
-			function selectUserName(userName)
-			{
+			function selectUserName(userName) {
 				var selectUsers = document.getElementById("userList");
 				selectUsers.value = userName;								
 			}
 			
-			function hndlAuthData(data)
-			{
-				if(data.isAvailable == false)
-				{
+			function hndlAuthData(data) {
+				if(data.isAvailable == false) {
 					alert("NOMBRE DE USUARIO YA COGIDO. ELIGE OTRO");
-					authenticate();					
+					authenticate();
 				}
 			}
 			
-			function authenticate()
-			{
-				while(userName == null)
-				{
+			function authenticate() {
+				while(userName == null) {
 					userName = prompt('Inserta nombre de usuario');
-				}				
-				socket.emit('authData', {"userName" : userName});								
+				}
+				socket.emit('authData', {"userName" : userName});
 			}
 			
-			function refreshUserList(data)
-			{
-				console.log(data);
-				console.log(data.length);
-				
+			function refreshUserList(data) {
 				var selectUsers = document.getElementById("userList");
 				selectUsers.options.length = 0;
 				selectUsers.options[0] = new Option(" -- TODOS -- ", 0);
-				var html = "<table>";				
-				for(var i = 0; i < data.length; i++)
-				{
+				var html = "<table>";
+				for(var i = 0; i < data.length; i++) {
 					html += "<tr class='selectable'>";
-					html += "<td onClick='selectUserName(\""+data[i].userName+"\")'>" +data[i].userName+"</td>";					
+					html += "<td onClick='selectUserName(\""+data[i].userName+"\")'>" +data[i].userName+"</td>";
 					html += "</tr>";
 					selectUsers.options[(i+1)] = new Option(data[i].userName, data[i].userName);
 				}
-				html += "</table>";				
-				$("#users").html(html);				
+				html += "</table>";
+				$("#users").html(html);
 			}
 			
-			function handleMessage(data)
-			{				
-				console.log(data);
-				if(data.type == "PUBLIC")
-				{
+			function handleMessage(data) {				
+				if(data.type == "PUBLIC")	{
 					var htmlCurrent = $("#chat_screen").html();
 					htmlCurrent += "<b>" + data.from + " DICE: </b>" + data.message + "<br/>";
 					$("#chat_screen").html(htmlCurrent);
-				}
-				else
-				{
+				}	else {
 					var htmlCurrent = $("#private_messages").html();
 					htmlCurrent += "<b>" + data.from + " DICE: </b>" + data.message + "<br/>";
 					$("#private_messages").html(htmlCurrent);
 				}
 			}
 			
-			function sendMessage()
-			{
+			function sendMessage() {
 				var msg = {};
 				
-				if($("#userList").val() != 0)
-				{
+				if($("#userList").val() != 0)	{
 					msg.type = "PRIVATE";
 					msg.to = $("#userList").val();
-				}
-				else
-				{				
+				} else {				
 					msg.type = "PUBLIC";
 				}
 				msg.from = 	userName;
-				msg.message = $("#message").val();
-				console.log(msg);
-				socket.emit('msg', msg);			
+				msg.message = $("#message").val();				
+				socket.emit('msg', msg);
 			}
 			
-			try
-			{
+			try	{
 				socket = io.connect('http://127.0.0.1:8056');
 				socket.on('authData', hndlAuthData);
 				socket.on('userList', refreshUserList);
 				socket.on('msg', handleMessage);
-			}
-			catch(e)
-			{
+			}	catch(e) {
 				alert(e);
 			}
 			
